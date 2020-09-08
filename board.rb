@@ -4,7 +4,7 @@ require "byebug"
 class Board
 
     def initialize(size)
-        @board = populate_board(size)
+        @board = populate_board(size*size)
     end
 
     def populate_board(size)
@@ -40,5 +40,5 @@ class Board
 
 end
 
-x = Board.new
+x = Board.new(9)
 x.render
