@@ -1,17 +1,22 @@
+require "byebug"
+
 class Tile
 
-    attr_reader :board
+    attr_reader :board, :bombed, :pos
 
-    def initialize(bomb, board)
+    def initialize(bomb, board, pos)
         @revealed = false
         @bombed = bomb
         @flagged = false
         @board = board
+        @pos = pos
     end
 
     def value
+        #return "*" if !@revealed
         return "B" if @bombed
-        "N"
+        return self.neighbor_bomb_count.to_s if self.neighbor_bomb_count > 0
+        return "_" if self.neighbor_bomb_count == 0
     end
 
     def flag
@@ -22,16 +27,9 @@ class Tile
         @revealed = true
     end
 
-    def find_pos
-        @board.board.each_with_index do |row, i|
-            if row.include?(self)
-                return [i,row.index(self)]
-            end
-        end
-    end
+    def neighbors
+        x,y = @pos
 
-    def neighbors(pos)
-        x,y = pos
         neighbors_pos_arr = [
             [(x+1),y],
             [(x+1),(y+1)],
@@ -42,62 +40,16 @@ class Tile
             [x,(y+1)],
             [x,(y-1)]
         ]
-        # neighbors_pos_arr = []
-
-        # if x == 0
-        #     neighbors_pos_arr = [
-        #     [(x+1),y],
-        #     [(x+1),(y+1)],
-        #     [(x+1),(y-1)],
-        #     [x,(y+1)],
-        #     [x,(y-1)]
-        # ]
-        # elsif x == board.length
-        #     neighbors_pos_arr = [
-        #     [(x-1),y],
-        #     [(x-1),(y+1)],
-        #     [(x-1),(y-1)],
-        #     [x,(y+1)],
-        #     [x,(y-1)]
-        # ]
-        # elsif y == 0
-        #     neighbors_pos_arr = [
-        #     [(x+1),y],
-        #     [(x+1),(y+1)],
-        #     [(x-1),y],
-        #     [(x-1),(y+1)],
-        #     [x,(y+1)]
-        # ]
-        # elsif y == board.length  
-        #     neighbors_pos_arr = [
-        #     [(x+1),y],
-        #     [(x+1),(y-1)]
-        #     [(x-1),y],
-        #     [(x-1),(y-1)],
-        #     [x,(y-1)]
-        # ]  
-        # else
-        #     neighbors_pos_arr = [
-        #     [(x+1),y],
-        #     [(x+1),(y+1)],
-        #     [(x+1),(y-1)],
-        #     [(x-1),y],
-        #     [(x-1),(y+1)],
-        #     [(x-1),(y-1)],
-        #     [x,(y+1)],
-        #     [x,(y-1)]
-        # ]
-        # end
-
-        # neighbors_pos_arr
-
     end
 
-    def neighbor_bomb_count(pos,board)
+    def neighbor_bomb_count
         bomb_count = 0
-        neighbors = self.neighbors(pos)
+        neighbors = self.neighbors
         neighbors.each do |neighbor|
-            bomb_count += 1 if board[neighbor].value == "B"
+            x,y = neighbor
+            if x >= 0 && x < 9 && y >= 0 && y < 9
+                bomb_count += 1 if @board.board[x][y].bombed == true
+            end
         end
         bomb_count
     end

@@ -34,9 +34,9 @@ class Board
     end
 
     def populate_board
-        @board = @board.map do |row|
-            row.map do |val|
-                Tile.new(val,self)
+        @board = @board.map.with_index do |row, i|
+            row.map.with_index do |val, j|
+                Tile.new(val,self, [i,j])
             end
         end
     end
@@ -47,7 +47,9 @@ class Board
     end
 
     def render
-        @board.each do |row|
+        puts "   #{(0..8).to_a.join(" ")}"
+        @board.each_with_index do |row, i|
+            print i.to_s + "  "
             row.each{|tile| print tile.value + " "}
             puts
         end
@@ -57,13 +59,16 @@ class Board
 end
 
 x = Board.new(9)
-#print x.board
 x.populate_board
 puts
-#print x.board
 x.render
-print x[[8,8]].value
-puts
-#print x[[8,8]].board.render
-puts
-print x[[8,8]].find_pos
+# print x[[8,8]].value
+# puts
+# print x[[8,8]]
+# puts
+# print x[[8,8]].pos
+# puts
+# print x[[8,8]].neighbors
+# puts
+# print x[[8,8]].neighbor_bomb_count
+# puts
