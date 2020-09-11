@@ -14,7 +14,7 @@ class MineSweeper
         pos = nil
         until pos && valid_pos?(pos)
             puts
-            puts "If you want to flag a tile, press F. Otherwise, enter a position on the board. Ex: 2,3."
+            puts "If you want to (un)flag a tile, press F. Otherwise, enter a position on the board. Ex: 2,3."
             print ">"
             begin
                 pos = parse_pos(gets.chomp)
@@ -34,7 +34,12 @@ class MineSweeper
     end
 
     def valid_pos?(pos)
-        pos.is_a?(Array) && pos.length == 2 && pos.all?{|num| num >= 0 && num < @size} && @board[pos].value == "*" || pos == "F" || pos == "X"
+        (pos.is_a?(Array) && 
+        pos.length == 2 && 
+        pos.all?{|num| num >= 0 && num < @size} && 
+        (@board[pos].value == "*" || @board[pos].value == "F")) ||
+         pos == "F" || 
+         pos == "X"
     end
 
     def get_flag_pos
@@ -59,19 +64,25 @@ class MineSweeper
 
         if pos == "F"
             pos = get_flag_pos
-            @board[pos].flag
-        elsif pos == "X"
-            pos = get_pos
-            @board[pos].reveal
+            if pos == "X"
+                play_turn
+            else
+                @board[pos].flag
+            end
         else
             @board[pos].reveal
         end
     end
 
     def game_over?
-        if @board.board.all?{|row| row.all?{|tile| tile.value != "*"}}
+        if @board.board.all?{|row| row.all?{|tile| tile.value != "*"}} && @board.board.none?{|row| row.none?{|tile| tile.value == "B"}}
             puts
             puts "You Win!"
+            puts
+            return true
+        elsif @board.board.all?{|row| row.all?{|tile| tile.value != "*"}}
+            puts
+            puts "You hit a bomb. You lose."
             puts
             return true
         end

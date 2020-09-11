@@ -29,11 +29,7 @@ class Tile
         @revealed = true
 
         if self.bombed == true
-            #debugger
             @board.board.each {|row| row.each{|tile| tile.revealed = true} }
-            puts
-            puts "You hit a bomb. You lose."
-            puts
         end
 
         if self.neighbor_bomb_count == 0
