@@ -3,6 +3,7 @@ require "byebug"
 class Tile
 
     attr_reader :board, :bombed, :pos
+    attr_writer  :revealed
 
     def initialize(bomb, board, pos)
         @revealed = false
@@ -13,7 +14,8 @@ class Tile
     end
 
     def value
-        #return "*" if !@revealed
+        return "F" if @flagged
+        return "*" if !@revealed
         return "B" if @bombed
         return self.neighbor_bomb_count.to_s if self.neighbor_bomb_count > 0
         return "_" if self.neighbor_bomb_count == 0
@@ -25,6 +27,35 @@ class Tile
 
     def reveal
         @revealed = true
+
+        if self.bombed == true
+            #debugger
+            @board.board.each {|row| row.each{|tile| tile.revealed = true} }
+            puts
+            puts "You hit a bomb. You lose."
+            puts
+        end
+
+        if self.neighbor_bomb_count == 0
+            self.reveal_neighbors
+        end
+    end
+
+    def reveal_neighbors
+        neighbors = self.neighbors
+        neighbors.each do |neighbor|
+            x,y = neighbor
+            # if x >= 0 && x < 9 && y >= 0 && y < 9
+            #     if @board.board[x][y].bombed == false && @board.board[x][y].flagged == false
+            #         @board.board[x][y].reveal
+            #     end
+            # end
+            if x >= 0 && x < @board.board.length && y >= 0 && y < @board.board.length
+                if @board[neighbor].bombed == false && @board[neighbor].value != "F" && @board[neighbor].value == "*"
+                    @board[neighbor].reveal
+                end
+            end
+        end
     end
 
     def neighbors
@@ -47,8 +78,9 @@ class Tile
         neighbors = self.neighbors
         neighbors.each do |neighbor|
             x,y = neighbor
-            if x >= 0 && x < 9 && y >= 0 && y < 9
-                bomb_count += 1 if @board.board[x][y].bombed == true
+            if x >= 0 && x < @board.board.length && y >= 0 && y < @board.board.length
+                #bomb_count += 1 if @board.board[x][y].bombed == true
+                bomb_count += 1 if @board[neighbor].bombed == true
             end
         end
         bomb_count

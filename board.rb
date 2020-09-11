@@ -7,6 +7,7 @@ class Board
 
     def initialize(size)
         @board = create_board(size*size)
+        self.populate_board
     end
 
     def create_board(size)
@@ -22,8 +23,10 @@ class Board
             bombs_arr << false
         end
 
-        Array.new(9) do
-            Array.new(9) do
+        length = Math.sqrt(size)
+
+        Array.new(length) do
+            Array.new(length) do
                 rand_i = rand(bombs_arr.length)
                 value = bombs_arr[rand_i]
                 bombs_arr.delete_at(rand_i)
@@ -47,6 +50,7 @@ class Board
     end
 
     def render
+        puts
         puts "   #{(0..8).to_a.join(" ")}"
         @board.each_with_index do |row, i|
             print i.to_s + "  "
@@ -58,10 +62,10 @@ class Board
 
 end
 
-x = Board.new(9)
-x.populate_board
-puts
-x.render
+# x = Board.new(9)
+# x.populate_board
+# puts
+# x.render
 # print x[[8,8]].value
 # puts
 # print x[[8,8]]
@@ -71,4 +75,6 @@ x.render
 # print x[[8,8]].neighbors
 # puts
 # print x[[8,8]].neighbor_bomb_count
+# puts
+# print x[[8,8]].board.board.length
 # puts
