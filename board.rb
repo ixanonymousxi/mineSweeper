@@ -1,4 +1,5 @@
 require_relative "tile"
+require 'colorize'
 require "byebug"
 
 class Board
@@ -49,16 +50,55 @@ class Board
         @board[x][y]
     end
 
+    def colors(val)
+        case val
+            when "F"
+            val.colorize(:magenta)
+            when "*"
+            val.colorize(:light_black)
+            when "B"
+            val.colorize(:red)
+            when "_"
+            val.colorize(:black)
+            when "1"
+            val.to_s.colorize(:green)
+            when "2"
+            val.to_s.colorize(:blue)
+            when "3"
+            val.to_s.colorize(:cyan)
+            when "4"
+            val.to_s.colorize(:light_green)
+            else
+            val
+        end
+    end
+
     def render
         puts
         puts "   #{(0..8).to_a.join(" ")}"
         @board.each_with_index do |row, i|
             print i.to_s + "  "
-            row.each{|tile| print tile.value + " "}
+            row.each{|tile| print colors(tile.value) + " "}
             puts
         end
     end
 
+    def win?
+        #@board.none?{|row| row.none?{|tile| tile.bombed == true && tile.revealed == true}} &&
+        @board.all? do |row| 
+            row.all? do |tile|
+                if tile.bombed == false
+                    tile.revealed == true
+                else
+                    tile.revealed == false
+                end
+            end
+        end         
+    end
+
+    def lose?
+        @board.any?{|row| row.any?{|tile| tile.bombed == true && tile.revealed == true}}
+    end
 
 end
 

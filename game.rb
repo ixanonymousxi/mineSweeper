@@ -69,18 +69,22 @@ class MineSweeper
             else
                 @board[pos].flag
             end
+        elsif pos == "X"
+            play_turn
+        elsif @board[pos].flagged == true
+            play_turn
         else
             @board[pos].reveal
         end
     end
 
     def game_over?
-        if @board.board.all?{|row| row.all?{|tile| tile.value != "*"}} && @board.board.none?{|row| row.none?{|tile| tile.value == "B"}}
+        if @board.win?
             puts
             puts "You Win!"
             puts
             return true
-        elsif @board.board.all?{|row| row.all?{|tile| tile.value != "*"}}
+        elsif @board.lose?
             puts
             puts "You hit a bomb. You lose."
             puts

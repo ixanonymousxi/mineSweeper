@@ -2,7 +2,7 @@ require "byebug"
 
 class Tile
 
-    attr_reader :board, :bombed, :pos
+    attr_reader :board, :bombed, :pos, :revealed, :flagged
     attr_writer  :revealed
 
     def initialize(bomb, board, pos)
