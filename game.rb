@@ -19,7 +19,7 @@ class MineSweeper
             begin
                 pos = parse_pos(gets.chomp)
             rescue
-                puts "Invalid position enterd. (Did you usea comma?)"
+                puts "Invalid position entered. (Did you use a comma?)"
                 puts ""
                 pos = nil
             end
@@ -51,7 +51,7 @@ class MineSweeper
             begin
                 pos = parse_pos(gets.chomp)
             rescue
-                puts "Invalid position enterd. (Did you usea comma?)"
+                puts "Invalid position entered. (Did you use a comma?)"
                 puts ""
                 pos = nil
             end
