@@ -1,5 +1,6 @@
 require_relative "board"
 require "byebug"
+require 'yaml'
 
 class MineSweeper
 
@@ -9,6 +10,11 @@ class MineSweeper
         @size = size
         @board = Board.new(size)
     end
+
+    # def saved_game
+    #     puts "Game saved!"
+    #     self.to_yaml >> saved_games
+    # end
 
     def get_pos
         pos = nil
@@ -103,8 +109,73 @@ class MineSweeper
 
 end
 
-x = MineSweeper.new(9)
-x.run
+$saved_games = []
+
+def start
+    puts "If you want to start a new game type 'N'." 
+    puts "If you want to load a saved game type 'S'."
+    puts "If you want to delete a saved game type 'D'."
+    print ">"
+    input = gets.chomp
+
+    if input == "N" || input == "n"
+        x = MineSweeper.new(9)
+        x.run
+    elsif (input == "S" || input == "s" || input == "D" || input == "d") && $saved_games.length == 0
+        puts "No saved games available"
+        start
+    elsif input == "S" || input == "s"
+        loadGame
+    elsif input == "D" || input == "d"
+        deleteGame
+    else
+        puts "Invalid input. Please try again"
+        start    
+    end
+end
+
+def loadGame
+    puts "Please select a number to load or type 'X' to go back."
+    puts
+    $saved_games.each_with_index do |game, i|
+        print (i+1).to_s + ".  " + game.to_s
+        puts
+    end
+    choice = gets.chomp
+
+    if choice == "X" || choice == "x"
+        start
+    elsif choice.to_i > 0 && choice.to_i <= $saved_games.length
+        #load game
+    else
+        puts "Invalid input. Please try again"
+        loadGame
+    end
+end
+
+def deleteGame
+    puts "Please select a number to delete or type 'X' to go back."
+    puts
+    $saved_games.each_with_index do |game, i|
+        print (i+1).to_s + ".  " + game.to_s
+        puts
+    end
+    choice = gets.chomp
+
+    if choice == "X" || choice == "x"
+        start
+    elsif choice.to_i > 0 && choice.to_i <= $saved_games.length
+        $saved_games.delete_at(choice.to_i - 1)
+        start
+    else
+        puts "Invalid input. Please try again"
+        deleteGame
+    end
+end
+
+start
+
+
 # puts
 #print x
 #print x.board
