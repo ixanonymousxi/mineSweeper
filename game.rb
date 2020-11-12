@@ -9,6 +9,7 @@ class MineSweeper
     def initialize(size)
         @size = size
         @board = Board.new(size)
+        @quit = false
     end
 
     def save_game
@@ -28,7 +29,7 @@ class MineSweeper
 
         input = gets.chomp
         if input == "Q" || input == "q"
-            start
+            @quit = true
         elsif input == "C" || input == "c"
             run
         else
@@ -134,7 +135,7 @@ class MineSweeper
 
     def run
         @board.render
-        until game_over?
+        until game_over? || $exit || @quit
             play_turn
             @board.render
         end
@@ -144,11 +145,13 @@ class MineSweeper
 end
 
 $saved_games = []
+$exit = false
 
 def start
     puts "If you want to start a new game type 'N'." 
     puts "If you want to load a saved game type 'S'."
     puts "If you want to delete a saved game type 'D'."
+    puts "If you want to exit the game type 'E'."
     print ">"
     input = gets.chomp
 
@@ -162,6 +165,8 @@ def start
         loadGame
     elsif input == "D" || input == "d"
         deleteGame
+    elsif input == "E" || input == "e"
+        $exit = true
     else
         puts "Invalid input. Please try again"
         start    
@@ -180,7 +185,6 @@ def loadGame
     if choice == "X" || choice == "x"
         start
     elsif choice.to_i > 0 && choice.to_i <= $saved_games.length
-        #load game
         game_chosen = $saved_games[choice.to_i - 1]["instance"]
         YAML::load(game_chosen).run
     else
@@ -209,7 +213,9 @@ def deleteGame
     end
 end
 
-start
+while(!$exit)
+    start
+end
 
 
 # puts
