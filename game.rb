@@ -11,16 +11,39 @@ class MineSweeper
         @board = Board.new(size)
     end
 
-    # def saved_game
-    #     puts "Game saved!"
-    #     self.to_yaml >> saved_games
-    # end
+    def save_game
+        puts "Please name your save file"
+        print ">"
+        file_name = gets.chomp
+        puts "Game saved!"
+        $saved_games << {"instance" => self.to_yaml, "name" => file_name}
+
+        quit?
+    end
+
+    def quit?
+        puts "Do you want to continue?"
+        puts "Type 'Q' to quit or 'C' to continue."
+        print ">"
+
+        input = gets.chomp
+        if input == "Q" || input == "q"
+            start
+        elsif input == "C" || input == "c"
+            run
+        else
+            puts "Invalid input. Please try again."
+            quit?
+        end
+    end
 
     def get_pos
         pos = nil
         until pos && valid_pos?(pos)
             puts
-            puts "If you want to (un)flag a tile, press F. Otherwise, enter a position on the board. Ex: 2,3."
+            puts "If you want to quit game, press Q. If you want to save game, press S."
+            puts "If you want to (un)flag a tile, press F."
+            puts "Otherwise, enter a position on the board. Ex: 2,3."
             print ">"
             begin
                 pos = parse_pos(gets.chomp)
@@ -36,6 +59,8 @@ class MineSweeper
     def parse_pos(string)
         return "F" if string == "F" || string == "f"
         return "X" if string == "X" || string == "x"
+        return "Q" if string == "Q" || string == "q"
+        return "S" if string == "S" || string == "s"
         string.split(",").map{|ele| Integer(ele)}
     end
 
@@ -45,7 +70,9 @@ class MineSweeper
         pos.all?{|num| num >= 0 && num < @size} && 
         (@board[pos].value == "*" || @board[pos].value == "F")) ||
          pos == "F" || 
-         pos == "X"
+         pos == "X" ||
+         pos == "S" ||
+         pos == "Q"
     end
 
     def get_flag_pos
@@ -77,6 +104,10 @@ class MineSweeper
             end
         elsif pos == "X"
             play_turn
+        elsif pos == "S"
+            save_game
+        elsif pos == "Q"
+            quit?
         elsif @board[pos].flagged == true
             play_turn
         else
@@ -105,6 +136,7 @@ class MineSweeper
             play_turn
             @board.render
         end
+        start
     end
 
 end
@@ -138,7 +170,7 @@ def loadGame
     puts "Please select a number to load or type 'X' to go back."
     puts
     $saved_games.each_with_index do |game, i|
-        print (i+1).to_s + ".  " + game.to_s
+        print (i+1).to_s + ".  " + game["name"]
         puts
     end
     choice = gets.chomp
@@ -147,6 +179,8 @@ def loadGame
         start
     elsif choice.to_i > 0 && choice.to_i <= $saved_games.length
         #load game
+        game_chosen = $saved_games[choice.to_i - 1]["instance"]
+        YAML::load(game_chosen).run
     else
         puts "Invalid input. Please try again"
         loadGame
@@ -157,7 +191,7 @@ def deleteGame
     puts "Please select a number to delete or type 'X' to go back."
     puts
     $saved_games.each_with_index do |game, i|
-        print (i+1).to_s + ".  " + game.to_s
+        print (i+1).to_s + ".  " + game["name"]
         puts
     end
     choice = gets.chomp
