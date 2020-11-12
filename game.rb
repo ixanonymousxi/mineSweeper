@@ -45,12 +45,13 @@ class MineSweeper
             puts "If you want to (un)flag a tile, press F."
             puts "Otherwise, enter a position on the board. Ex: 2,3."
             print ">"
-            begin
-                pos = parse_pos(gets.chomp)
-            rescue
+            
+            pos = parse_pos(gets.chomp)
+
+            if !valid_pos?(pos)
                 puts "Invalid position entered. (Did you use a comma?)"
                 puts ""
-                pos = nil
+                get_pos
             end
         end
         pos
@@ -81,12 +82,13 @@ class MineSweeper
             puts
             puts "Enter a position on the board to flag. Ex: 2,3. Type 'X' to cancel."
             print ">"
-            begin
-                pos = parse_pos(gets.chomp)
-            rescue
+
+            pos = parse_pos(gets.chomp)
+
+            if !valid_pos?(pos)
                 puts "Invalid position entered. (Did you use a comma?)"
                 puts ""
-                pos = nil
+                get_flag_pos
             end
         end
         pos
