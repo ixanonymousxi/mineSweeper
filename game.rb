@@ -10,6 +10,7 @@ class MineSweeper
         @size = size
         @board = Board.new(size)
         @quit = false
+        @exit = false
     end
 
     def save_game
@@ -17,7 +18,16 @@ class MineSweeper
         print ">"
         file_name = gets.chomp
         puts "Game saved!"
-        $saved_games << {"instance" => self.to_yaml, "name" => file_name}
+
+        games_list = YAML.load(File.read("yaml_games.txt"))
+        
+        if games_list.kind_of?(Array)
+            games_list << {"instance" => self, "name" => file_name}
+        else
+            games_list = [{"instance" => self, "name" => file_name}]
+        end
+
+        File.open("yaml_games.txt", "w") { |file| file.write(games_list.to_yaml) }
 
         quit?
     end
@@ -133,90 +143,175 @@ class MineSweeper
         false
     end
 
-    def run
-        @board.render
-        until game_over? || $exit || @quit
-            play_turn
-            @board.render
+    def start
+        @quit = false
+        puts "If you want to start a new game type 'N'." 
+        puts "If you want to load a saved game type 'S'."
+        puts "If you want to delete a saved game type 'D'."
+        puts "If you want to exit the game type 'E'."
+        print ">"
+        input = gets.chomp
+
+        games_list = YAML.load(File.read("yaml_games.txt"))
+
+        if input == "N" || input == "n"
+            self.run
+        elsif (input == "S" || input == "s" || input == "D" || input == "d") && (!games_list.kind_of?(Array) || games_list.length == 0)
+            puts "No saved games available"
+            start
+        elsif input == "S" || input == "s"
+            loadGame
+        elsif input == "D" || input == "d"
+            deleteGame
+        elsif input == "E" || input == "e"
+            @exit = true
+        else
+            puts "Invalid input. Please try again"
+            start    
         end
-        start
     end
 
-end
-
-$saved_games = []
-$exit = false
-
-def start
-    puts "If you want to start a new game type 'N'." 
-    puts "If you want to load a saved game type 'S'."
-    puts "If you want to delete a saved game type 'D'."
-    puts "If you want to exit the game type 'E'."
-    print ">"
-    input = gets.chomp
-
-    if input == "N" || input == "n"
-        x = MineSweeper.new(9)
-        x.run
-    elsif (input == "S" || input == "s" || input == "D" || input == "d") && $saved_games.length == 0
-        puts "No saved games available"
-        start
-    elsif input == "S" || input == "s"
-        loadGame
-    elsif input == "D" || input == "d"
-        deleteGame
-    elsif input == "E" || input == "e"
-        $exit = true
-    else
-        puts "Invalid input. Please try again"
-        start    
-    end
-end
-
-def loadGame
-    puts "Please select a number to load or type 'X' to go back."
-    puts
-    $saved_games.each_with_index do |game, i|
-        print (i+1).to_s + ".  " + game["name"]
+    def loadGame
+        puts "Please select a number to load or type 'X' to go back."
         puts
-    end
-    choice = gets.chomp
 
-    if choice == "X" || choice == "x"
-        start
-    elsif choice.to_i > 0 && choice.to_i <= $saved_games.length
-        game_chosen = $saved_games[choice.to_i - 1]["instance"]
-        YAML::load(game_chosen).run
-    else
-        puts "Invalid input. Please try again"
-        loadGame
-    end
-end
+        games_list = YAML.load(File.read("yaml_games.txt"))
+        games_list.each_with_index  do |hash, i|
+            print (i+1).to_s + ". " + hash["name"]
+            puts
+        end
 
-def deleteGame
-    puts "Please select a number to delete or type 'X' to go back."
-    puts
-    $saved_games.each_with_index do |game, i|
-        print (i+1).to_s + ".  " + game["name"]
+        choice = gets.chomp
+
+        if choice == "X" || choice == "x"
+            start
+        elsif choice.to_i > 0 && choice.to_i <= games_list.length
+            games_list[choice.to_i - 1]["instance"].run
+        else
+            puts "Invalid input. Please try again"
+            loadGame
+        end
+    end
+
+    def deleteGame
+        puts "Please select a number to delete or type 'X' to go back."
         puts
-    end
-    choice = gets.chomp
+        games_list = YAML.load(File.read("yaml_games.txt"))
+        games_list.each_with_index  do |hash, i|
+            print (i+1).to_s + ". " + hash["name"]
+            puts
+        end
 
-    if choice == "X" || choice == "x"
-        start
-    elsif choice.to_i > 0 && choice.to_i <= $saved_games.length
-        $saved_games.delete_at(choice.to_i - 1)
-        start
-    else
-        puts "Invalid input. Please try again"
-        deleteGame
+        choice = gets.chomp
+
+        if choice == "X" || choice == "x"
+            start
+        elsif choice.to_i > 0 && choice.to_i <= games_list.length
+            games_list.delete_at(choice.to_i - 1)
+            File.open("yaml_games.txt", "w") { |file| file.write(games_list.to_yaml) }
+            start
+        else
+            puts "Invalid input. Please try again"
+            deleteGame
+        end
     end
+
+    def run
+        until @exit
+            @board.render
+            until game_over? || @quit
+                play_turn
+                @board.render
+            end
+            start
+        end
+    end
+
 end
 
-while(!$exit)
-    start
-end
 
+#$exit = false
+
+# def start
+#     puts "If you want to start a new game type 'N'." 
+#     puts "If you want to load a saved game type 'S'."
+#     puts "If you want to delete a saved game type 'D'."
+#     puts "If you want to exit the game type 'E'."
+#     print ">"
+#     input = gets.chomp
+
+#     games_list = YAML.load(File.read("yaml_games.txt"))
+
+#     if input == "N" || input == "n"
+#         x = MineSweeper.new(9)
+#         x.run
+#     elsif (input == "S" || input == "s" || input == "D" || input == "d") && !games_list.kind_of?(Array)
+#         puts "No saved games available"
+#         start
+#     elsif input == "S" || input == "s"
+#         loadGame
+#     elsif input == "D" || input == "d"
+#         deleteGame
+#     elsif input == "E" || input == "e"
+#         $exit = true
+#     else
+#         puts "Invalid input. Please try again"
+#         start    
+#     end
+# end
+
+# def loadGame
+#     puts "Please select a number to load or type 'X' to go back."
+#     puts
+
+#     games_list = YAML.load(File.read("yaml_games.txt"))
+#     games_list.each_with_index  do |hash, i|
+#         print (i+1).to_s + ". " + hash["name"]
+#         puts
+#     end
+
+#     choice = gets.chomp
+
+#     if choice == "X" || choice == "x"
+#         start
+#     elsif choice.to_i > 0 && choice.to_i <= games_list.length
+#         games_list[choice.to_i - 1]["instance"].run
+#     else
+#         puts "Invalid input. Please try again"
+#         loadGame
+#     end
+# end
+
+# def deleteGame
+#     puts "Please select a number to delete or type 'X' to go back."
+#     puts
+#     games_list = YAML.load(File.read("yaml_games.txt"))
+#     games_list.each_with_index  do |hash, i|
+#         print (i+1).to_s + ". " + hash["name"]
+#         puts
+#     end
+
+#     choice = gets.chomp
+
+#     if choice == "X" || choice == "x"
+#         start
+#     elsif choice.to_i > 0 && choice.to_i <= games_list.length
+#         games_list.delete_at(choice.to_i - 1)
+#         File.open("yaml_games.txt", "w") { |file| file.write(games_list.to_yaml) }
+#         start
+#     else
+#         puts "Invalid input. Please try again"
+#         deleteGame
+#     end
+# end
+
+# while(!$exit)
+#     start
+# end
+
+
+x = MineSweeper.new(9)
+x.start
 
 # puts
 #print x
